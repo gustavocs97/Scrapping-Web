@@ -1,0 +1,57 @@
+// Função para atualizar os botões de página
+function atualizarBotoesDePagina() {
+    // Encontra todos os elementos que representam "próxima página"
+    const nextPageElements = document.querySelectorAll('span.pagination-link[onclick^="pagingViewModel.changePage("]');
+
+    nextPageElements.forEach(nextPageElement => {
+        // Obtém a URL atual
+        let currentUrl = window.location.href;
+        
+        // Encontra o parâmetro de página atual na URL
+        let match = currentUrl.match(/&page=(\d+)/);
+        if (match) {
+            let currentPage = parseInt(match[1], 10);
+            
+            // Calcula o número da próxima página
+            let nextPage = currentPage + 1;
+            
+            // Cria um novo elemento de botão para a próxima página
+            const newNextPageElement = document.createElement('a');
+            newNextPageElement.classList.add('pagination-link');
+            newNextPageElement.setAttribute('tabindex', '0');
+            newNextPageElement.setAttribute('data-page', nextPage);
+            newNextPageElement.setAttribute('aria-label', `Página ${nextPage}`);
+            newNextPageElement.textContent = `Página ${nextPage}`;
+            newNextPageElement.href = currentUrl.replace(/&page=\d+/, `&page=${nextPage}`);
+            
+            // Substitui o botão existente pelo novo botão
+            nextPageElement.parentNode.replaceChild(newNextPageElement, nextPageElement);
+            
+            console.log(`Botão de próxima página substituído para ir para a página ${nextPage}.`);
+        } else {
+            console.log('Não foi possível encontrar o parâmetro de página na URL.');
+        }
+    });
+}
+
+// Função para observar mudanças na página
+function observarMudancasNaPagina() {
+    // Cria um observador de mutação
+    const observer = new MutationObserver(mutationsList => {
+        for (let mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                // Se houver mudanças na lista de filhos, atualiza os botões de página
+                atualizarBotoesDePagina();
+            }
+        }
+    });
+
+    // Observa mudanças no nó da página
+    observer.observe(document.body, { subtree: true, childList: true });
+}
+
+// Chama a função para atualizar os botões de página inicialmente
+atualizarBotoesDePagina();
+
+// Chama a função para observar mudanças na página
+observarMudancasNaPagina();
